@@ -93,6 +93,9 @@
 	[toolbar setVisible:![[NSUserDefaults standardUserDefaults] boolForKey:@"ToolbarHidden"]];
 	[toolbar setDelegate:self];
 	[window setToolbar:toolbar];
+	if (@available(macOS 11.0, *)) {
+		[window setToolbarStyle:NSWindowToolbarStyleExpanded];
+	}
 	
 	[window setShowsToolbarButton:NO];
 	titleBarButton = [[TitlebarButton alloc] initWithFrame:NSMakeRect(0, 0, 17.0, 17.0) pullsDown:YES];
