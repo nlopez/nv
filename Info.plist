@@ -217,7 +217,7 @@
 	<key>SUCheckAtStartup</key>
 	<false/>
 	<key>SUFeedURL</key>
-	<string>http://notational.net/nvupdates.xml</string>
+	<string>https://notational.net/nvupdates.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
 	<key>SUScheduledCheckInterval</key>

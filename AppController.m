@@ -748,7 +748,7 @@ terminateApp:
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:NSLocalizedString(@"SiteURL", nil)]];
 			break;
 		case 4:		//development site
-			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://notational.net/development"]];
+			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://notational.net/development"]];
 			break;
 		default:
 			NSBeep();
