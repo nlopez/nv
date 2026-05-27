@@ -41,7 +41,7 @@
 #import "NotesTableView.h"
 #import "UnifiedCell.h"
 #import "LabelColumnCell.h"
-#import "ODBEditor.h"
+
 
 #if __LP64__
 // Needed for compatability with data created by 32bit app
@@ -1706,37 +1706,11 @@ force_inline id unifiedCellForNote(NotesTableView *tv, NoteObject *note, NSInteg
 }
 
 - (void)editExternallyUsingEditor:(ExternalEditor*)ed {
-	[[ODBEditor sharedODBEditor] editNote:self inEditor:ed context:nil];
+	// ODB protocol removed; direct file editing not supported
 }
 
 - (void)abortEditingInExternalEditor {
-	[[ODBEditor sharedODBEditor] abortAllEditingSessionsForClient:self];
-}
-
--(void)odbEditor:(ODBEditor *)editor didModifyFile:(NSString *)path newFileLocation:(NSString *)newPath  context:(NSDictionary *)context {
-
-	//read path/newPath into NSData and update note contents
-	
-	//can't use updateFromCatalogEntry because it would assign ownership via various metadata
-	
-	if ([self updateFromData:[NSMutableData dataWithContentsOfFile:path options:NSUncachedRead error:NULL] inFormat:PlainTextFormat]) {
-		//reflect the temp file's changes directly back to the backing-store-file, database, and sync services
-		[self makeNoteDirtyUpdateTime:YES updateFile:YES];
-		
-		[delegate note:self attributeChanged:NotePreviewString];
-		[[delegate delegate] contentsUpdatedForNote:self];
-	} else {
-		NSBeep();
-		NSLog(@"odbEditor:didModifyFile: unable to get data from %@", path);
-	}	
-}
--(void)odbEditor:(ODBEditor *)editor didClosefile:(NSString *)path context:(NSDictionary *)context {
-	//remove the temp file	
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-	[[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
-#else
-	[[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
-#endif
+	// ODB protocol removed
 }
 
 - (NSRange)nextRangeForWords:(NSArray*)words options:(unsigned)opts range:(NSRange)inRange {

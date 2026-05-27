@@ -28,7 +28,7 @@
 #import "GlobalPrefs.h"
 #import "NotationPrefs.h"
 #import "NSString_NV.h"
-#import "NSDictionary+BSJSONAdditions.h"
+
 #import "AttributedPlainText.h"
 #import "InvocationRecorder.h"
 #import "SynchronizedNoteProtocol.h"
@@ -1018,14 +1018,14 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 		lastIndexAuthFailed = NO;
 		NSDictionary *responseDictionary = nil;
 		NSArray *rawEntries = nil;
-		@try {
-			responseDictionary = [NSDictionary dictionaryWithJSONString:bodyString];
-			if (responseDictionary) {
+		{
+			NSError *jsonError = nil;
+			responseDictionary = [NSJSONSerialization JSONObjectWithData:[bodyString dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&jsonError];
+			if ([responseDictionary isKindOfClass:[NSDictionary class]]) {
 				rawEntries = [responseDictionary objectForKey:@"data"];
+			} else {
+				NSLog(@"Error parsing Simplenote JSON index: %@", jsonError);
 			}
-		} @catch (NSException *e) {
-			NSLog(@"Exception while parsing Simplenote JSON index: %@", [e reason]);
-		} @finally {
 			if (!rawEntries) {
 				[self _stoppedWithErrorString:NSLocalizedString(@"The index of notes could not be parsed.", @"Simplenote-specific error")];
 				return;

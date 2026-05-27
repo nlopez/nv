@@ -33,7 +33,7 @@
 #import "NoteAttributeColumn.h"
 #import "FrozenNotation.h"
 #import "AlienNoteImporter.h"
-#import "ODBEditor.h"
+
 #import "NotationFileManager.h"
 #import "NotationSyncServiceManager.h"
 #import "NotationDirectoryManager.h"
@@ -580,7 +580,7 @@ bail:
 	[self flushEverything];
 	
 	//called whenever note-storage format or encryption-activation changes
-	[[ODBEditor sharedODBEditor] initializeDatabase:notationPrefs];
+
 }
 
 //notation prefs delegate method
@@ -619,7 +619,7 @@ bail:
 		[self synchronizeNotesFromDirectory];		
     }
 	//perform after delay because this could trigger the mounting of a RAM disk in a background  NSTask
-	[[ODBEditor sharedODBEditor] performSelector:@selector(initializeDatabase:) withObject:notationPrefs afterDelay:0.0];
+
 }
 
 - (int)currentNoteStorageFormat {

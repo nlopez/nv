@@ -63,13 +63,7 @@ NSString *ExternalEditorsChangedNotification = @"ExternalEditorsChanged";
 	//and if this note isn't actually stored in a separate file, then obviously it can't be opened directly
 	if ([[aNote delegate] currentNoteStorageFormat] == SingleDatabaseFormat) return NO;
 	
-	//and if aNote is in plaintext format and this editor is ODB-capable, then it should also be a general-purpose texteditor
-	//conversely ODB editors should never be allowed to open non-plain-text documents; for some reason LSCanURLAcceptURL claims they can do that
-	//one exception known: writeroom can edit rich-text documents
-	if ([self isODBEditor] && ![bundleIdentifier hasPrefix:@"com.hogbaysoftware.WriteRoom"]) {
-		return storageFormatOfNote(aNote) == PlainTextFormat;
-	}
-		
+	
 	if (!knownPathExtensions) knownPathExtensions = [NSMutableDictionary new];
 	NSString *extension = [[filenameOfNote(aNote) pathExtension] lowercaseString];
 	NSNumber *canHandleNumber = [knownPathExtensions objectForKey:extension];
@@ -93,7 +87,7 @@ NSString *ExternalEditorsChangedNotification = @"ExternalEditorsChanged";
 - (BOOL)canEditAllNotes:(NSArray*)notes {
 	NSUInteger i = 0;
 	for (i=0; i<[notes count]; i++) {
-		if (![self isODBEditor] && ![self canEditNoteDirectly:[notes objectAtIndex:i]])
+		if (![self canEditNoteDirectly:[notes objectAtIndex:i]])
 			return NO;
 	}
 	return YES;
@@ -131,10 +125,6 @@ NSString *ExternalEditorsChangedNotification = @"ExternalEditorsChanged";
 
 - (BOOL)isInstalled {
 	return [self resolvedURL] != nil;
-}
-
-- (BOOL)isODBEditor {
-	return [[ExternalEditorListController ODBAppIdentifiers] containsObject:bundleIdentifier];
 }
 
 - (NSString*)bundleIdentifier {
@@ -217,40 +207,7 @@ static ExternalEditorListController* sharedInstance = nil;
 	
 	//initialize the default editor if one has not already been set or if the identifier was somehow lost from the list
 	if (![self editorIsMember:[self defaultExternalEditor]] || ![[self defaultExternalEditor] isInstalled]) {
-		if ([[self _installedODBEditors] count]) {
-			[self setDefaultEditor:[[self _installedODBEditors] lastObject]];
-		}
 	}
-}
-
-- (NSArray*)_installedODBEditors {
-	if (!_installedODBEditors) {
-		_installedODBEditors = [[NSMutableArray alloc] initWithCapacity:5];
-		
-		NSArray *ODBApps = [[[self class] ODBAppIdentifiers] allObjects];
-		NSUInteger i = 0;
-		for (i=0; i<[ODBApps count]; i++) {
-			ExternalEditor *ed = [[ExternalEditor alloc] initWithBundleID:[ODBApps objectAtIndex:i] resolvedURL:nil];
-			if ([ed isInstalled]) {
-				[_installedODBEditors addObject:ed];
-			}
-			[ed release];
-		}
-		[_installedODBEditors sortUsingSelector:@selector(compareDisplayName:)];
-	}
-	return _installedODBEditors;
-}
-
-+ (NSSet*)ODBAppIdentifiers {
-	static NSSet *_ODBAppIdentifiers = nil;
-	if (!_ODBAppIdentifiers) 
-		_ODBAppIdentifiers = [[NSSet alloc] initWithObjects:
-							  @"de.codingmonkeys.SubEthaEdit", @"com.barebones.bbedit", @"com.barebones.textwrangler", 
-							  @"com.macromates.textmate", @"com.transtex.texeditplus", @"jp.co.artman21.JeditX", @"org.gnu.Aquamacs", 
-							  @"org.smultron.Smultron", @"com.peterborgapps.Smultron", @"org.fraise.Fraise", @"com.aynimac.CotEditor", @"com.macrabbit.cssedit", 
-							  @"com.talacia.Tag", @"org.skti.skEdit", @"com.cgerdes.ji", @"com.optima.PageSpinner", @"com.hogbaysoftware.WriteRoom", 
-							  @"com.hogbaysoftware.WriteRoom.mac", @"org.vim.MacVim", @"com.forgedit.ForgEdit", @"com.tacosw.TacoHTMLEdit", @"com.macrabbit.espresso", nil];
-	return _ODBAppIdentifiers;
 }
 
 - (void)addUserEditorFromDialog:(id)sender {
@@ -311,7 +268,7 @@ errorReturn:
 
 - (BOOL)editorIsMember:(ExternalEditor*)anEditor {
 	//does the editor exist in any of the lists?
-	return [userEditorList containsObject:anEditor] || [[ExternalEditorListController ODBAppIdentifiers] containsObject:[anEditor bundleIdentifier]];
+	return [userEditorList containsObject:anEditor];
 }
 
 - (NSMenu*)addEditorPrefsMenu {
@@ -353,8 +310,7 @@ errorReturn:
 	
 	BOOL isPrefsMenu = [editorPrefsMenus containsObject:theMenu];
 	BOOL didAddItem = NO;
-	NSMutableArray *editors = [NSMutableArray arrayWithArray:[self _installedODBEditors]];
-	[editors addObjectsFromArray:[userEditorList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES"]]];
+	NSMutableArray *editors = [NSMutableArray arrayWithArray:[userEditorList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES"]]];
 	[editors sortUsingSelector:@selector(compareDisplayName:)];
 	
 	NSUInteger i = 0;
